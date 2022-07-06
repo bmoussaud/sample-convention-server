@@ -14,4 +14,4 @@ deploy-intent:
 	kubectl apply -f mysample-podintent.yaml
 
 undeploy-intent:
-	kubectl apply -f mysample-podintent.yaml
+	kubectl delete -f mysample-podintent.yaml
