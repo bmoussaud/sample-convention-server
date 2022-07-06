@@ -115,10 +115,10 @@ metadata:
 spec:
   selectors: # optional, defaults to match all workloads<metav1.LabelSelector>
     - matchExpressions:
-        - key: severity
+        - key: environment
           operator: In
           values:
-            - critical
+            - production
   webhook:
     clientConfig:
       service:

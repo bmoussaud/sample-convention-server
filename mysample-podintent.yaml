@@ -4,7 +4,7 @@ kind: PodIntent
 metadata:
   name: my-sample
   labels:
-    severity: low
+    severity: critical
     environment: production
     app: nginx
 spec:
