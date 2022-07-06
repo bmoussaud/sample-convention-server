@@ -9,7 +9,7 @@ metadata:
   name: sample-selfsigned-issuer
   namespace: sample-convention
 spec:
-  selfSigned: { }
+  selfSigned: {}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -19,13 +19,13 @@ metadata:
 spec:
   subject:
     organizations:
-    - vmware
+      - vmware
     organizationalUnits:
-    - tanzu
+      - tanzu
   commonName: sample-webhook.sample-convention.svc
   dnsNames:
-  - sample-webhook.sample-convention.svc
-  - sample-webhook.sample-convention.svc.cluster.local
+    - sample-webhook.sample-convention.svc
+    - sample-webhook.sample-convention.svc.cluster.local
   issuerRef:
     kind: Issuer
     name: sample-selfsigned-issuer
@@ -48,50 +48,50 @@ spec:
         app: sample-webhook
     spec:
       containers:
-      - name: webhook
-        image: ghcr.io/making/sample-convention-server
-        env:
-        - name: LOGGING_LEVEL_COM_EXAMPLE_CONVENTION
-          value: info
-        - name: SERVER_PORT
-          value: "8443"
-        - name: SERVER_TOMCAT_MAX_THREADS
-          value: "20"
-        - name: JAVA_TOOL_OPTIONS
-          value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8
-        - name: BPL_JVM_THREAD_COUNT
-          value: "24"
-        - name: TLS_CERTIFICATE
-          value: file:/config/certs/tls.crt
-        - name: TLS_CERTIFICATEPRIVATEKEY
-          value: file:/config/certs/tls.key
-        ports:
-        - containerPort: 8443
-          name: webhook
-        livenessProbe:
-          httpGet:
-            scheme: HTTPS
-            port: webhook
-            path: /actuator/health/liveness
-        readinessProbe:
-          httpGet:
-            scheme: HTTPS
-            port: webhook
-            path: /actuator/health/readiness
-        resources:
-          limits:
-            memory: 256Mi
-          requests:
-            memory: 256Mi
-        volumeMounts:
-        - name: certs
-          mountPath: /config/certs
-          readOnly: true
+        - name: webhook
+          image: harbor.mytanzu.xyz/library/sample-convention-server
+          env:
+            - name: LOGGING_LEVEL_COM_EXAMPLE_CONVENTION
+              value: info
+            - name: SERVER_PORT
+              value: "8443"
+            - name: SERVER_TOMCAT_MAX_THREADS
+              value: "20"
+            - name: JAVA_TOOL_OPTIONS
+              value: -XX:ReservedCodeCacheSize=32M -Xss512k -Duser.timezone=Asia/Tokyo -Dfile.encoding=UTF-8
+            - name: BPL_JVM_THREAD_COUNT
+              value: "24"
+            - name: TLS_CERTIFICATE
+              value: file:/config/certs/tls.crt
+            - name: TLS_CERTIFICATEPRIVATEKEY
+              value: file:/config/certs/tls.key
+          ports:
+            - containerPort: 8443
+              name: webhook
+          livenessProbe:
+            httpGet:
+              scheme: HTTPS
+              port: webhook
+              path: /actuator/health/liveness
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              port: webhook
+              path: /actuator/health/readiness
+          resources:
+            limits:
+              memory: 256Mi
+            requests:
+              memory: 256Mi
+          volumeMounts:
+            - name: certs
+              mountPath: /config/certs
+              readOnly: true
       volumes:
-      - name: certs
-        secret:
-          defaultMode: 420
-          secretName: sample-webhook-cert
+        - name: certs
+          secret:
+            defaultMode: 420
+            secretName: sample-webhook-cert
 ---
 apiVersion: v1
 kind: Service
@@ -102,9 +102,9 @@ spec:
   selector:
     app: sample-webhook
   ports:
-  - protocol: TCP
-    port: 443
-    targetPort: webhook
+    - protocol: TCP
+      port: 443
+      targetPort: webhook
 ---
 apiVersion: conventions.apps.tanzu.vmware.com/v1alpha1
 kind: ClusterPodConvention
@@ -113,9 +113,15 @@ metadata:
   annotations:
     conventions.apps.tanzu.vmware.com/inject-ca-from: "sample-convention/sample-webhook-cert"
 spec:
+  selectors: # optional, defaults to match all workloads<metav1.LabelSelector>
+    - matchExpressions:
+        - key: severity
+          operator: In
+          values:
+            - critical
   webhook:
     clientConfig:
       service:
         name: sample-webhook
         namespace: sample-convention
----
+
