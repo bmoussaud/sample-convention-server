@@ -1,11 +1,11 @@
-IMAGE_NAME=harbor.mytanzu.xyz/library/sample-convention-server
+IMAGE_NAME=akseutap2registry.azurecr.io/sample-convention-server
 
 build:
 	./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=$(IMAGE_NAME)
 	docker push $(IMAGE_NAME)
 
 deploy-convention:
-	kbld -f k8s/server-for-tap1.1.yaml | kapp deploy -a sample-convention -f - -c -y
+	ytt -f k8s --ignore-unknown-comments --data-value image=$(IMAGE_NAME) | kbld -f- | kapp deploy -a sample-convention -f - -c -y
 
 undeploy-convention:
 	kapp delete -a sample-convention -y

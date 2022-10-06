@@ -1,3 +1,6 @@
+---
+#@ load("@ytt:data", "data")
+---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -49,7 +52,7 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: harbor.mytanzu.xyz/library/sample-convention-server
+          image: #@ data.values.image
           env:
             - name: LOGGING_LEVEL_COM_EXAMPLE_CONVENTION
               value: info
